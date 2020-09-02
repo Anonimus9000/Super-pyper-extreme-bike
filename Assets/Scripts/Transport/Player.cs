@@ -7,7 +7,7 @@ using UnityEngine;
 public class Player : Transport
 {
     [SerializeField] private string _name;
-    [SerializeField] private float _radius;
+    private LayerTracker _layerTracker;
     private float _score;
     private float _completedDistance;
     private float _passedSeconds;
@@ -27,6 +27,8 @@ public class Player : Transport
     void Start()
     {
         rigidbody = GetComponent<Rigidbody>();
+
+        _layerTracker = GetComponentInChildren<LayerTracker>();
         
         rigidbody.constraints = RigidbodyConstraints.FreezePositionX 
                                 | RigidbodyConstraints.FreezeRotationY 
@@ -46,14 +48,13 @@ public class Player : Transport
         MovementLogic();
         DistanceCalculate();
         _score = CalculateScore();
-        Debug.Log(_score);
     }
-    
+
     #endregion
 
     private void MovementLogic()
     {
-        if (Input.GetButton("Fire1"))
+        if (Input.GetButton("Fire1") && IsOnGround())
         {
             MoveForward();
         }
@@ -62,11 +63,6 @@ public class Player : Transport
         {
             MoveVertical(Input.GetAxis("Horizontal"));
         }
-    }
-
-    private bool IsOnGraund()
-    {
-        return true;
     }
 
     private float CalculateScore()
@@ -90,10 +86,9 @@ public class Player : Transport
             return false;
     }
 
-    private void OnDrawGizmos()
+    private bool IsOnGround()
     {
-        Gizmos.color = Color.green;
-        Gizmos.DrawSphere(gameObject.transform.position, _radius);
+        return _layerTracker.IsTrackedLayer();
     }
 
     IEnumerator GameTimerPerSecond()
