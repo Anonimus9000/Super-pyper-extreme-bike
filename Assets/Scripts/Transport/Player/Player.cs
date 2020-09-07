@@ -7,7 +7,7 @@ using UnityEngine;
 public class Player : Transport
 {
     [SerializeField] private string _name;
-    private LayerTracker _layerTracker;
+    private GroundChecker _groundChecker;
     private float _score;
     private float _completedDistance;
     private float _passedSeconds;
@@ -28,7 +28,7 @@ public class Player : Transport
     {
         rigidbody = GetComponent<Rigidbody>();
 
-        _layerTracker = GetComponentInChildren<LayerTracker>();
+        _groundChecker = GetComponentInChildren<GroundChecker>();
         
         rigidbody.constraints = RigidbodyConstraints.FreezePositionX 
                                 | RigidbodyConstraints.FreezeRotationY 
@@ -39,14 +39,18 @@ public class Player : Transport
     {
         if (IsActive())
             _isStarted = true;
+        
         if (!_isStarted)
             StartCoroutine(GameTimerPerSecond());
     }
 
     private void FixedUpdate()
     {
+        
         MovementLogic();
+        
         DistanceCalculate();
+        
         _score = CalculateScore();
     }
 
@@ -54,14 +58,14 @@ public class Player : Transport
 
     private void MovementLogic()
     {
-        if (Input.GetButton("Fire1") && IsOnGround())
+        if (Input.GetButton("Fire1") && IsOnGround() && _groundChecker.IsTrackedLayer())
         {
             MoveForward();
         }
         
         if (Input.GetAxis("Horizontal") != 0)
         {
-            MoveVertical(Input.GetAxis("Horizontal"));
+            MoveRotate(Input.GetAxis("Horizontal"));
         }
     }
 
@@ -88,7 +92,7 @@ public class Player : Transport
 
     private bool IsOnGround()
     {
-        return _layerTracker.IsTrackedLayer();
+        return _groundChecker.IsTrackedLayer();
     }
 
     IEnumerator GameTimerPerSecond()

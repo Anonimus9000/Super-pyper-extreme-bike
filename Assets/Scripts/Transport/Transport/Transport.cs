@@ -10,7 +10,7 @@ public abstract class Transport : MonoBehaviour, ITransport
     [SerializeField] protected float turnSpeed;
     
     protected Rigidbody rigidbody;
-    
+
     /// <summary>
     /// Use only in fixedUpdate methood
     /// </summary>
@@ -21,7 +21,7 @@ public abstract class Transport : MonoBehaviour, ITransport
     /// <summary>
     /// Use only in fixedUpdate methood
     /// </summary>
-    protected  virtual void MoveVertical(float axis)
+    protected  virtual void MoveRotate(float axis)
     {
         rigidbody.AddRelativeTorque(new Vector3(axis * turnSpeed * Time.fixedDeltaTime,0f, 0f));
     }
