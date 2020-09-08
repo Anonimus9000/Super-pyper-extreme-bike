@@ -20,12 +20,6 @@ public class GroundChecker : MonoBehaviour
         if (_tagGround == "")
             _tagGround = "Ground";
     }
-
-    private void FixedUpdate()
-    {
-        Debug.Log(_isTracked);
-    }
-
     #endregion
 
     private void OnTriggerStay(Collider other)
