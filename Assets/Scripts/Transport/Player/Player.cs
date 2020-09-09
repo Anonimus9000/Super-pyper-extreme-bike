@@ -46,7 +46,7 @@ public class Player : Transport
 
     private void FixedUpdate()
     {
-        
+
         MovementLogic();
         
         DistanceCalculate();
