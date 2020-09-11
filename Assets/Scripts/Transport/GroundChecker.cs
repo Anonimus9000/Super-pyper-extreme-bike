@@ -9,6 +9,7 @@ public class GroundChecker : MonoBehaviour
 {
     [SerializeField] private string _tagGround;
     [SerializeField] private SphereCollider _triggerCollider;
+    [SerializeField] private float _radiusChecker;
     private Vector3 _objectWithTrackPosition;
     private bool _isTracked = false;
 
@@ -16,6 +17,7 @@ public class GroundChecker : MonoBehaviour
     private void Start()
     {
         _triggerCollider.isTrigger = true;
+        _triggerCollider.radius = _radiusChecker;
         
         if (_tagGround == "")
             _tagGround = "Ground";

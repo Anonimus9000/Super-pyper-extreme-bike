@@ -13,7 +13,9 @@ public class GroundPlacer : MonoBehaviour
     [SerializeField] private Ground _firstGround;
     [SerializeField] private float _minAngleOfRotation;
     [SerializeField] private float _maxAngleOfRotation;
-    [SerializeField] private float _minAngleDifference;
+    [SerializeField] private float _minSharpAngle;
+    [SerializeField] private int _maxSpawnedGround = 20;
+    [SerializeField] private float _distantionToSpawn = 30f; 
     
     private List<Ground> _spawnedGround = new List<Ground>();
 
@@ -26,13 +28,13 @@ public class GroundPlacer : MonoBehaviour
 
     private void Update()
     {
-        if (_player.position.z >= _spawnedGround[_spawnedGround.Count - 1].GetEndTransform().position.z - 30f)
+        if (_player.position.z >= _spawnedGround[_spawnedGround.Count - 1].GetEndTransform().position.z - _distantionToSpawn)
         {
             SpawnGround();
             
         }
 
-        if (_spawnedGround.Count > 20)
+        if (_spawnedGround.Count > _maxSpawnedGround)
         {
             Destroy(_spawnedGround[0].gameObject);
             _spawnedGround.RemoveAt(0);
@@ -79,12 +81,12 @@ public class GroundPlacer : MonoBehaviour
         if (nextRotation.y == 180)
             nextRotation.x = 90 + (90 - nextRotation.x);
 
-        var difRotationX = preRotation.x - nextRotation.x;
+        var angleBetweenTwoGround = (180 - preRotation.x) + nextRotation.x; 
 
-        if (difRotationX > _minAngleDifference)
+        if (angleBetweenTwoGround < _minSharpAngle)
         {
-            preRotation.x -= difRotationX / 2;
-            nextRotation.x += difRotationX / 2;
+            preRotation.x -= angleBetweenTwoGround / 2;
+            nextRotation.x += angleBetweenTwoGround / 2;
             
             _spawnedGround.Last().transform.rotation = Quaternion.Euler(preRotation);
             ground.transform.rotation = Quaternion.Euler(nextRotation);

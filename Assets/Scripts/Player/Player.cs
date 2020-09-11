@@ -8,9 +8,7 @@ public class Player : Transport
 {
     [SerializeField] private string _name;
     private GroundChecker _groundChecker;
-    private float _score;
-    private float _completedDistance;
-    private float _passedSeconds;
+    private bool _isDead = false;
     private bool _isStarted = false;
 
     #region MonoBehaviour
@@ -39,22 +37,31 @@ public class Player : Transport
     {
         if (IsActive())
             _isStarted = true;
-        
-        if (!_isStarted)
-            StartCoroutine(GameTimerPerSecond());
+
+        if (IsDead)
+        {
+            rigidbody.isKinematic = true;
+        }
     }
 
     private void FixedUpdate()
     {
-
         MovementLogic();
-        
-        DistanceCalculate();
-        
-        _score = CalculateScore();
+
     }
 
     #endregion
+
+    public bool IsStarted
+    {
+        get => _isStarted;
+    }
+
+    public bool IsDead
+    {
+        set => _isDead = value;
+        get => _isDead;
+    }
 
     private void MovementLogic()
     {
@@ -69,19 +76,6 @@ public class Player : Transport
         }
     }
 
-    private float CalculateScore()
-    {
-        return (_completedDistance / _passedSeconds);
-    }
-
-    private void DistanceCalculate()
-    {
-        _completedDistance += rigidbody.velocity.z * Time.fixedDeltaTime;
-        
-        if (_completedDistance < 0)
-            _completedDistance = 0;
-    }
-    
     private bool IsActive()
     {
         if (Input.GetAxis("Horizontal") != 0 || Input.GetButtonDown("Fire1"))
@@ -93,11 +87,5 @@ public class Player : Transport
     private bool IsOnGround()
     {
         return _groundChecker.IsTrackedLayer();
-    }
-
-    IEnumerator GameTimerPerSecond()
-    {
-        yield return new WaitForSeconds(1);
-        _passedSeconds += 1;
     }
 }
