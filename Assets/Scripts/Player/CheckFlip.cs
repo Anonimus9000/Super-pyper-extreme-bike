@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
+using UnityEditor.PackageManager;
 using UnityEngine;
 using UnityEngine.Rendering;
 
@@ -8,11 +9,10 @@ public class CheckFlip : MonoBehaviour
 {
     [SerializeField] private Player _player;
     [SerializeField] private GroundChecker _groundChecker;
-    [SerializeField] private int _groundLayer = 8;
+    [SerializeField] private LayerMask _groundLayer;
+    private bool _isFlipComplete = false;
     private int _count;
     private float _angle;
-    private bool _isFlipComplete = true;
-    private bool _isFlipStart = false;
 
 
     #region MonoBehabiour
@@ -26,12 +26,9 @@ public class CheckFlip : MonoBehaviour
 
     private void FixedUpdate()
     {
-        if (!_groundChecker.IsTrackedLayer())
-        {
-            LetRayUp();
-            LetRayDown();
-        }
-        Debug.Log(_count);
+        CountFlips();
+        
+        Debug.Log("Count = " + _count);
     }
 
     #endregion
@@ -48,94 +45,60 @@ public class CheckFlip : MonoBehaviour
     
     private void CorrectionCount()
     {
-        if (_isFlipComplete && !_groundChecker.IsTrackedLayer())
+        if (!_groundChecker.IsTrackedLayer())
             _count += 1;
     }
 
-    private void LetRayUp()
+    private void CountFlips()
     {
-        RaycastHit hit;
+        bool isDownRayReached = false;
+        bool isUpRayReached = false;
         
-        var playerPosition = _player.transform.position;
-        var playerDirectionUp = _player.transform.TransformDirection(Vector3.up);
-        if (_isFlipStart)
+        if (!_groundChecker.IsTrackedLayer())
         {
-            if (Physics.Raycast(playerPosition, playerDirectionUp, out hit, 150f))
-            {
-                if (hit.collider.gameObject.layer == _groundLayer)
-                {
-                    Debug.Log("Ray up " + hit.collider.gameObject.tag);
-                    _isFlipComplete = true;
-                    _isFlipStart = false;
-                    _count++;
-                }
-            }
-
-            Color rayColor = Color.red;
-
-            if (hit.collider.gameObject.layer == _groundLayer)
-                rayColor = Color.green;
-
-            Debug.DrawRay(playerPosition, playerDirectionUp * 100, rayColor, 0.1f, false);
+            isUpRayReached = IsRayFromPlayerReachedPlane(Vector3.up);
+            isDownRayReached = IsRayFromPlayerReachedPlane(Vector3.down);
         }
-    }
-    
-    private void LetRayDown()
-    {
-        RaycastHit hit;
-        
-        var playerPosition = _player.transform.position;
-        var playerDirectionDown = _player.transform.TransformDirection(Vector3.down);
-        
-        if (_isFlipComplete)
+
+        if (!isUpRayReached && isDownRayReached && _isFlipComplete)
+            _isFlipComplete = false;
+
+        if (isUpRayReached && !isDownRayReached && !_isFlipComplete)
         {
-            if (Physics.Raycast(playerPosition, playerDirectionDown, out hit, 150f))
-            {
-                Color rayColor = Color.red;
-
-                if(hit.collider.gameObject.layer == _groundLayer)
-                    rayColor = Color.green;
-        
-                Debug.DrawRay(playerPosition, playerDirectionDown, rayColor * 100, 0.1f, false);
-                
-                if (hit.collider.gameObject.layer == _groundLayer)
-                {
-                    Debug.Log("Ray down " + hit.collider.gameObject.tag);
-                    _isFlipComplete = false;
-                    _isFlipStart = true;
-                }
-            }
-        }
-    }
-
-    private void CalculateAngle()
-    {
-        if (_groundChecker.IsTrackedLayer())
-        {
-            _angle = _player.transform.localRotation.eulerAngles.x;
-
-            if (gameObject.transform.localRotation.eulerAngles.y == 180)
-                _angle += 90f;
-
-            Debug.Log("Angle = " + _angle);
-        }
-    }
-
-    private void CheckStartFlip()
-    {
-        if (_angle > 180)
-        {
-            _isFlipStart = true;
-        }
-    }
-
-    private void CheckCompleteFlip()
-    {
-        if (_angle > 270 && _isFlipStart)
-        {
+            _count++;
             _isFlipComplete = true;
-            _isFlipStart = false;
         }
-        Debug.Log("Flip complete = " + _isFlipComplete);
+    }
+
+    private bool IsRayFromPlayerReachedPlane(Vector3 direction)
+    {
+        RaycastHit hit;
+        bool isRayReached = false;
+            
+        var playerPosition = _player.transform.position;
+        var playerDirection = _player.transform.TransformDirection(direction);
+
+        int ignoreLayer = 1 << _player.gameObject.layer;
+        ignoreLayer = ~ignoreLayer;
+
+        if (Physics.Raycast(playerPosition, playerDirection, out hit, 150f, ignoreLayer))
+        {
+            int hitLayer = 1 << hit.collider.gameObject.layer;
+            float distantionPlayerPlaneZ =
+                DistantionAlongZAxis(_player.transform.position.z, hit.collider.gameObject.transform.position.z);
+            
+            if (hitLayer == _groundLayer && distantionPlayerPlaneZ < 3f)
+            {
+                Debug.Log("Ray up " + hit.collider.gameObject.tag);
+                isRayReached = true;
+            }
+        }
+
+        return isRayReached;
+    }
+
+    private float DistantionAlongZAxis(float from, float to)
+    {
+        return Mathf.Abs(from- to);
     }
 }
