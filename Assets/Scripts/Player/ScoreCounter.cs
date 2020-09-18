@@ -33,9 +33,14 @@ public class ScoreCounter : MonoBehaviour
             StartCoroutine(Timer());
         }
 
-        CalculateScore();
-        
         ShowArguments();
+    }
+
+    private void FixedUpdate()
+    {
+        CalculateScore();
+        // Debug.Log("Time = " + _time);
+        // Debug.Log("Score = " + _score);
     }
 
     #endregion
@@ -43,10 +48,15 @@ public class ScoreCounter : MonoBehaviour
     private void CalculateScore()
     {
         //не хочет нормально делить на время
-        _score += _player.GetComponent<Rigidbody>().velocity.z;
-        _score = _score / _time;
-
-        _score += _scoreForFlip * _checkFlip.Count;
+        _score += _player.GetComponent<Rigidbody>().velocity.z / 20;
+        
+         if(_score > _time/_score && _time/_score > 0)
+             _score = _score - _time/_score;
+        
+        _score += _scoreForFlip * _checkFlip.GetLastFlipsCount();
+        _checkFlip.ClearLastFlipCount();
+        
+        Debug.Log(_checkFlip.GetLastFlipsCount());
     }
     private void ShowArguments()
     {

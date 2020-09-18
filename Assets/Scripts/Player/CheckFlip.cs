@@ -10,8 +10,11 @@ public class CheckFlip : MonoBehaviour
     [SerializeField] private Player _player;
     [SerializeField] private GroundChecker _groundChecker;
     [SerializeField] private LayerMask _groundLayer;
+    [SerializeField] private ParticleSystem _effecctCompleteFlip;
     private bool _isFlipComplete = false;
+    private int _lastFlipsCount;
     private int _count;
+    private int _preCount;
     private float _angle;
 
 
@@ -24,10 +27,16 @@ public class CheckFlip : MonoBehaviour
             _groundChecker = FindObjectOfType<GroundChecker>();
     }
 
+    private void Update()
+    {
+        SaveLastFlipsCount();
+        EffectIfFlipComplete();
+    }
+
     private void FixedUpdate()
     {
         CountFlips();
-        
+
         Debug.Log("Count = " + _count);
     }
 
@@ -38,15 +47,37 @@ public class CheckFlip : MonoBehaviour
         get => _count;
     }
 
+    public int GetLastFlipsCount()
+    {
+        return _lastFlipsCount;
+    }
+
+    public void ClearLastFlipCount()
+    {
+        _lastFlipsCount = 0;
+    }
+
     public void Clear()
     {
         _count = 0;
+        _preCount = 0;
     }
     
     private void CorrectionCount()
     {
         if (!_groundChecker.IsTrackedLayer())
             _count += 1;
+    }
+
+    private void EffectIfFlipComplete()
+    {
+        if (_preCount != _count && _groundChecker.IsTrackedLayer())
+        {
+            _effecctCompleteFlip.gameObject.transform.rotation = _player.transform.rotation;
+            _effecctCompleteFlip.gameObject.transform.position = _player.transform.position;
+            _preCount = _count;
+            _effecctCompleteFlip.Play();
+        }
     }
 
     private void CountFlips()
@@ -95,6 +126,14 @@ public class CheckFlip : MonoBehaviour
         }
 
         return isRayReached;
+    }
+
+    private void SaveLastFlipsCount()
+    {
+        if (_preCount != _count && _groundChecker.IsTrackedLayer())
+        {
+            _lastFlipsCount = _count - _preCount;
+        }
     }
 
     private float DistantionAlongZAxis(float from, float to)
