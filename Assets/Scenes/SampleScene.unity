@@ -5700,11 +5700,6 @@ MonoBehaviour:
   _maskObstacles:
     serializedVersion: 2
     m_Bits: 256
---- !u!4 &1056920336 stripped
-Transform:
-  m_CorrespondingSourceObject: {fileID: 6634081844209669312, guid: 667fde83936083f4c86217fb5764844c, type: 3}
-  m_PrefabInstance: {fileID: 6634081844495321040}
-  m_PrefabAsset: {fileID: 0}
 --- !u!4 &1227564168 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 6634081843306570584, guid: 667fde83936083f4c86217fb5764844c, type: 3}
@@ -5827,14 +5822,50 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 5e7fe43b119f96f429cf12ec4b945371, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _player: {fileID: 1056920336}
+  _playerTransform: {fileID: 0}
   _groundPrefab: {fileID: 3428284396274423678, guid: bef4e991425e8164d811fc0acda04047, type: 3}
   _firstGround: {fileID: 1584164125}
-  _minAngleOfRotation: 20
-  _maxAngleOfRotation: 160
-  _minSharpAngle: 75
+  _minAngleOfRotation: 30
+  _maxAngleOfRotation: 170
+  _minAcuteAngle: 40
+  _maxObtuseAngle: 320
+  _maxAngleComplication: 80
   _maxSpawnedGround: 20
   _distantionToSpawn: 30
+  _scoreCounter: {fileID: 0}
+  _complicationByScore:
+    serializedVersion: 2
+    m_Curve:
+    - serializedVersion: 3
+      time: 0
+      value: 0
+      inSlope: 0.06
+      outSlope: 0.06
+      tangentMode: 34
+      weightedMode: 0
+      inWeight: 0
+      outWeight: 0.33333334
+    - serializedVersion: 3
+      time: 1000
+      value: 60
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 34
+      weightedMode: 0
+      inWeight: 0.33333334
+      outWeight: 0.33333334
+    - serializedVersion: 3
+      time: 2000
+      value: 0
+      inSlope: -0.06
+      outSlope: -0.06
+      tangentMode: 34
+      weightedMode: 0
+      inWeight: 0.33333334
+      outWeight: 0.33333334
+    m_PreInfinity: 2
+    m_PostInfinity: 1
+    m_RotationOrder: 4
 --- !u!4 &1669952858
 Transform:
   m_ObjectHideFlags: 0
@@ -6073,7 +6104,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 6634081844209669312, guid: 667fde83936083f4c86217fb5764844c, type: 3}
       propertyPath: m_LocalPosition.z
-      value: 1.79
+      value: 2.9
       objectReference: {fileID: 0}
     - target: {fileID: 6634081844209669312, guid: 667fde83936083f4c86217fb5764844c, type: 3}
       propertyPath: m_LocalRotation.x

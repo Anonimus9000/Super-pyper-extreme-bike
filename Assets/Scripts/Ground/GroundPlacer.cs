@@ -4,31 +4,52 @@ using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 using UnityEngine.iOS;
+using UnityEngine.Rendering;
 using Random = UnityEngine.Random;
 
 public class GroundPlacer : MonoBehaviour
 {
-    [SerializeField] private Transform _player;
+    [SerializeField] private Transform _playerTransform;
     [SerializeField] private Ground _groundPrefab;
     [SerializeField] private Ground _firstGround;
+    [Space(5)]
     [SerializeField] private float _minAngleOfRotation;
     [SerializeField] private float _maxAngleOfRotation;
-    [SerializeField] private float _minSharpAngle;
+    [Space(5)]
+    [SerializeField] private float _minAcuteAngle;
+    [SerializeField] private float _maxObtuseAngle;
+    [Space(5)]
+    [SerializeField] private float _maxAngleComplication = 90f;
+    [Space(5)]
     [SerializeField] private int _maxSpawnedGround = 20;
-    [SerializeField] private float _distantionToSpawn = 30f; 
+    [SerializeField] private float _distantionToSpawn = 30f;
+    [SerializeField] private ScoreCounter _scoreCounter;
+    [Tooltip("Value between 0 and 1")]
+    [SerializeField] private AnimationCurve _complicationByScore;
+    
     
     private List<Ground> _spawnedGround = new List<Ground>();
 
+    #region MonoBehaviour
+
+    private void OnValidate()
+    {
+        if (_scoreCounter = null)
+            _scoreCounter = FindObjectOfType<ScoreCounter>();
+    }
+
     private void Start()
     {
-        if (_player == null)
-            _player = FindObjectOfType<Player>().transform;
+        _scoreCounter = FindObjectOfType<ScoreCounter>();
+        
+        if (_playerTransform == null)
+            _playerTransform = FindObjectOfType<Player>().transform;
         _spawnedGround.Add(_firstGround);
     }
 
     private void Update()
     {
-        if (_player.position.z >= _spawnedGround[_spawnedGround.Count - 1].GetEndTransform().position.z - _distantionToSpawn)
+        if (_playerTransform.position.z >= _spawnedGround[_spawnedGround.Count - 1].GetEndTransform().position.z - _distantionToSpawn)
         {
             SpawnGround();
             
@@ -41,6 +62,9 @@ public class GroundPlacer : MonoBehaviour
         }
 
     }
+    
+
+    #endregion
 
     private void SpawnGround()
     {
@@ -67,29 +91,91 @@ public class GroundPlacer : MonoBehaviour
         var randAngle = Random.Range(_minAngleOfRotation, _maxAngleOfRotation);
         var newRotation = Quaternion.Euler(randAngle, 0f, 0f);
         ground.transform.rotation = newRotation;
+        
         CurrectionRandomRotation(ground);
     }
 
     private void CurrectionRandomRotation(Ground ground)
     {
-        var preRotation = _spawnedGround.Last().transform.rotation.eulerAngles;
-        var nextRotation = ground.transform.rotation.eulerAngles;
+        var PreRotationEuler = _spawnedGround.Last().transform.rotation.eulerAngles;
+        var NextRotationEuler = ground.transform.rotation.eulerAngles;
 
-        if (preRotation.y == 180)
-            preRotation.x = 90 + (90 - preRotation.x);
+        float preRotation = EulerToSimpleAngleX(PreRotationEuler);
+        float nextRotation = EulerToSimpleAngleX(NextRotationEuler);
+
+        Debug.Log("OldPreRotation = " + preRotation);
+        Debug.Log("OldNextRotation = " + nextRotation);
+
+        nextRotation = ComplicationAngle(preRotation, nextRotation);
         
-        if (nextRotation.y == 180)
-            nextRotation.x = 90 + (90 - nextRotation.x);
+        Debug.Log("ComplicationNextRotation = " + nextRotation);
 
-        var angleBetweenTwoGround = (180 - preRotation.x) + nextRotation.x; 
+        CorrectMinAcuteAngle(ref preRotation, ref nextRotation);
+        CorrectMaxObtuseAngle(ref preRotation, ref nextRotation);
+        
+        Debug.Log("Corrected nextRotation = " + nextRotation);
+        
+        ground.transform.rotation = Quaternion.Euler(nextRotation, 0, 0);
+       
+    }
 
-        if (angleBetweenTwoGround < _minSharpAngle)
+    private void CorrectMinAcuteAngle(ref float anglePreGround, ref float angleNextGround)
+    {
+        var angleBetweenTwoGround = (180 - anglePreGround) + angleNextGround; 
+
+        if (angleBetweenTwoGround < _minAcuteAngle)
         {
-            preRotation.x -= angleBetweenTwoGround / 2;
-            nextRotation.x += angleBetweenTwoGround / 2;
+            float different = _minAcuteAngle - angleBetweenTwoGround;
             
-            _spawnedGround.Last().transform.rotation = Quaternion.Euler(preRotation);
-            ground.transform.rotation = Quaternion.Euler(nextRotation);
+            anglePreGround -= different / 2;
+            angleNextGround += different / 2;
+            
+            _spawnedGround.Last().transform.rotation = Quaternion.Euler(anglePreGround, 0, 0);
         }
+    }
+    
+    private void CorrectMaxObtuseAngle(ref float anglePreGround, ref float angleNextGround)
+    {
+        var angleBetweenTwoGround = (180 - anglePreGround) + (180 - angleNextGround); 
+
+        if (angleBetweenTwoGround > _maxObtuseAngle)
+        {
+            float different = _minAcuteAngle - angleBetweenTwoGround;
+            
+            anglePreGround += different / 2;
+            angleNextGround -= different / 2;
+            
+            _spawnedGround.Last().transform.rotation = Quaternion.Euler(anglePreGround, 0, 0);
+        }
+    }
+
+    private float ComplicationAngle(float anglePreGround, float angleNextGround)
+    {
+        float complicationValue = _complicationByScore.Evaluate(_scoreCounter.GetScore());
+
+        if (Mathf.Abs(anglePreGround - angleNextGround) < 90)
+            angleNextGround -= complicationValue;
+          
+        else if (Mathf.Abs(anglePreGround - angleNextGround) > 90)
+            angleNextGround += complicationValue;
+        
+
+        if (angleNextGround > _maxAngleOfRotation)
+            angleNextGround = _maxAngleOfRotation;
+            
+        if (angleNextGround < _minAngleOfRotation)
+            angleNextGround = _minAngleOfRotation;
+
+        return angleNextGround;
+    }
+
+    private float EulerToSimpleAngleX(Vector3 eulerAngle)
+    {
+        float simpleAngle = eulerAngle.x;
+
+        if (eulerAngle.y == 180)
+            simpleAngle = 90 + (90 - eulerAngle.x);
+
+        return simpleAngle;
     }
 }

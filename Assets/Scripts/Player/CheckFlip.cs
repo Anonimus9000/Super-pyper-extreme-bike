@@ -36,8 +36,6 @@ public class CheckFlip : MonoBehaviour
     private void FixedUpdate()
     {
         CountFlips();
-
-        Debug.Log("Count = " + _count);
     }
 
     #endregion

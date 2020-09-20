@@ -44,14 +44,18 @@ public class ScoreCounter : MonoBehaviour
     }
 
     #endregion
-    
+
+    public float GetScore()
+    {
+        return _score;
+    }
     private void CalculateScore()
     {
         //не хочет нормально делить на время
         _score += _player.GetComponent<Rigidbody>().velocity.z / 20;
         
          if(_score > _time/_score && _time/_score > 0)
-             _score = _score - _time/_score;
+             _score = _score - 0.1f;
         
         _score += _scoreForFlip * _checkFlip.GetLastFlipsCount();
         _checkFlip.ClearLastFlipCount();
