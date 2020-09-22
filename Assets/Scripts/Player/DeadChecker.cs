@@ -7,21 +7,24 @@ using UnityEngine.UI;
 public class DeadChecker : MonoBehaviour
 {
     [SerializeField] private Player _player;
-    [SerializeField] private Image _imageDeadUI;
+    [SerializeField] private ScoreCounter _scoreCounter;
+    [SerializeField] private ResultScore _resultScore;
 
-    private void Start()
+    private void OnValidate()
     {
-        _imageDeadUI.fillAmount = 0;
-        
+        if (_scoreCounter == null)
+            _scoreCounter = FindObjectOfType<ScoreCounter>();
         if (_player == null)
             _player = FindObjectOfType<Player>();
+        if(_resultScore == null)
+            _resultScore = FindObjectOfType<ResultScore>();
     }
 
     private void OnTriggerEnter(Collider other)
     {
         if (other.tag == "Ground")
         {
-            _imageDeadUI.fillAmount = 1;
+            _resultScore.Show();
             _player.IsDead = true;
         }
     }

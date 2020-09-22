@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections;
-using System.Collections.Generic;
-using UnityEditor.Experimental.GraphView;
-using UnityEditor.UIElements;
-using UnityEngine;
+﻿using UnityEngine;
 
 public class GroundChecker : MonoBehaviour
 {
@@ -12,6 +7,7 @@ public class GroundChecker : MonoBehaviour
     [SerializeField] private float _radiusChecker;
     private Vector3 _objectWithTrackPosition;
     private bool _isTracked = false;
+    
 
     #region MonoBehaviour
     private void Start()

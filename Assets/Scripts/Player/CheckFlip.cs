@@ -1,9 +1,5 @@
-﻿using System;
-using System.Collections;
-using System.Collections.Generic;
-using UnityEditor.PackageManager;
-using UnityEngine;
-using UnityEngine.Rendering;
+﻿using UnityEngine;
+
 
 public class CheckFlip : MonoBehaviour
 {
@@ -118,7 +114,6 @@ public class CheckFlip : MonoBehaviour
             
             if (hitLayer == _groundLayer && distantionPlayerPlaneZ < 3f)
             {
-                Debug.Log("Ray up " + hit.collider.gameObject.tag);
                 isRayReached = true;
             }
         }

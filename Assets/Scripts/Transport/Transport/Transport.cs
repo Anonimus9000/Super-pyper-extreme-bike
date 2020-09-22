@@ -21,9 +21,9 @@ public abstract class Transport : MonoBehaviour, ITransport
     /// <summary>
     /// Use only in fixedUpdate methood
     /// </summary>
-    protected  virtual void MoveRotate(float axis)
+    protected  virtual void MoveRotate(float horizontalAxis)
     {
-        rigidbody.AddRelativeTorque(new Vector3(axis * turnSpeed * Time.fixedDeltaTime,0f, 0f));
+        rigidbody.AddRelativeTorque(new Vector3(horizontalAxis * turnSpeed * Time.fixedDeltaTime,0f, 0f));
     }
 
     public virtual void Lose()

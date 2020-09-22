@@ -1,15 +1,13 @@
-﻿using System;
-using System.Collections;
-using System.Collections.Generic;
-using JetBrains.Annotations;
-using UnityEngine;
+﻿using UnityEngine;
 
 public class Player : Transport
 {
     [SerializeField] private string _name;
     private GroundChecker _groundChecker;
+    private MobileMove _mobileMove;
     private bool _isDead = false;
     private bool _isStarted = false;
+    private float _horizontalAxis;
 
     #region MonoBehaviour
 
@@ -25,6 +23,8 @@ public class Player : Transport
     void Start()
     {
         rigidbody = GetComponent<Rigidbody>();
+
+        _mobileMove = GetComponent<MobileMove>();
 
         _groundChecker = GetComponentInChildren<GroundChecker>();
         
@@ -42,16 +42,21 @@ public class Player : Transport
         {
             rigidbody.isKinematic = true;
         }
+        
+        SetHorizontalAxis();
     }
 
     private void FixedUpdate()
     {
         MovementLogic();
-
     }
 
     #endregion
 
+    public void Pause()
+    {
+        _isStarted = false;
+    }
     public bool IsStarted
     {
         get => _isStarted;
@@ -70,15 +75,15 @@ public class Player : Transport
             MoveForward();
         }
         
-        if (Input.GetAxis("Horizontal") != 0)
+        if (_horizontalAxis != 0)
         {
-            MoveRotate(Input.GetAxis("Horizontal"));
+            MoveRotate(_horizontalAxis);
         }
     }
 
     private bool IsActive()
     {
-        if (Input.GetAxis("Horizontal") != 0 || Input.GetButtonDown("Fire1"))
+        if (_horizontalAxis != 0 || Input.GetButtonDown("Fire1"))
             return true;
         else
             return false;
@@ -87,5 +92,16 @@ public class Player : Transport
     private bool IsOnGround()
     {
         return _groundChecker.IsTrackedLayer();
+    }
+
+    private void SetHorizontalAxis()
+    {
+        if (_mobileMove.GetHorizontalAxis() != 0)
+            _horizontalAxis = _mobileMove.GetHorizontalAxis();
+        else 
+            _horizontalAxis = Input.GetAxis("Horizontal");
+        
+        Debug.Log("Mobile axis = " + _mobileMove.GetHorizontalAxis());
+        Debug.Log("HorizontalAxis = " + _horizontalAxis);
     }
 }

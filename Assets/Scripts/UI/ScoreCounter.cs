@@ -10,8 +10,10 @@ public class ScoreCounter : MonoBehaviour
     [SerializeField] private CheckFlip _checkFlip;
     [SerializeField] private Text _scoreUI;
     [SerializeField] private Text _timeUI;
+    [SerializeField] private Text _highScoreUI;
     [SerializeField] private float _scoreForFlip;
     private bool _isTimerStarted = false;
+    private float _highScore = 0f;
     private float _score;
     private float _time;
 
@@ -25,22 +27,33 @@ public class ScoreCounter : MonoBehaviour
             _checkFlip = FindObjectOfType<CheckFlip>();
     }
 
+    private void Start()
+    {
+        _highScore = GetSavedHightScore();
+    }
+    
     private void Update()
     {
         if (_player.IsStarted && !_isTimerStarted)
         {
             _isTimerStarted = true;
             StartCoroutine(Timer());
+            
         }
 
-        ShowArguments();
+        if (_player.IsStarted == true)
+        {
+            ShowArguments();
+
+            SetHightScore();
+
+            SaveHightScore();
+        }
     }
 
     private void FixedUpdate()
     {
         CalculateScore();
-        // Debug.Log("Time = " + _time);
-        // Debug.Log("Score = " + _score);
     }
 
     #endregion
@@ -49,9 +62,21 @@ public class ScoreCounter : MonoBehaviour
     {
         return _score;
     }
+
+    public bool IsNewRecord()
+    {
+        if (_score >= GetSavedHightScore())
+            return true;
+        else
+            return false;
+    }
+    
+    public float GetSavedHightScore()
+    {
+        return  PlayerPrefs.GetFloat("HightScore");
+    }
     private void CalculateScore()
     {
-        //не хочет нормально делить на время
         _score += _player.GetComponent<Rigidbody>().velocity.z / 20;
         
          if(_score > _time/_score && _time/_score > 0)
@@ -59,13 +84,23 @@ public class ScoreCounter : MonoBehaviour
         
         _score += _scoreForFlip * _checkFlip.GetLastFlipsCount();
         _checkFlip.ClearLastFlipCount();
-        
-        Debug.Log(_checkFlip.GetLastFlipsCount());
     }
     private void ShowArguments()
     {
         _timeUI.text = ((int) _time).ToString();
         _scoreUI.text = ((int) _score).ToString();
+        _highScoreUI.text = ((int) _highScore).ToString();
+    }
+
+    private void SetHightScore()
+    {
+        if(_score > GetSavedHightScore())
+            _highScore = _score;
+    }
+
+    private void SaveHightScore()
+    {
+        PlayerPrefs.SetFloat("HightScore", _highScore);
     }
 
     IEnumerator Timer()

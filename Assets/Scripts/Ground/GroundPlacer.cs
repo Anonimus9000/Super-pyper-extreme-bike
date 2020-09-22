@@ -1,10 +1,6 @@
-﻿using System;
-using System.Collections;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
-using UnityEngine.iOS;
-using UnityEngine.Rendering;
 using Random = UnityEngine.Random;
 
 public class GroundPlacer : MonoBehaviour
@@ -13,11 +9,11 @@ public class GroundPlacer : MonoBehaviour
     [SerializeField] private Ground _groundPrefab;
     [SerializeField] private Ground _firstGround;
     [Space(5)]
-    [SerializeField] private float _minAngleOfRotation;
-    [SerializeField] private float _maxAngleOfRotation;
+    [SerializeField] private float _minAngleOfRotation = 20f;
+    [SerializeField] private float _maxAngleOfRotation = 170f;
     [Space(5)]
-    [SerializeField] private float _minAcuteAngle;
-    [SerializeField] private float _maxObtuseAngle;
+    [SerializeField] private float _minAcuteAngle = 30f;
+    [SerializeField] private float _maxObtuseAngle = 330f;
     [Space(5)]
     [SerializeField] private float _maxAngleComplication = 90f;
     [Space(5)]
@@ -34,16 +30,17 @@ public class GroundPlacer : MonoBehaviour
 
     private void OnValidate()
     {
-        if (_scoreCounter = null)
+        if (_playerTransform == null)
+            _playerTransform = FindObjectOfType<Player>().transform;
+        if (_firstGround == null)
+            _firstGround = FindObjectOfType<Ground>();
+        if(_scoreCounter == null)
             _scoreCounter = FindObjectOfType<ScoreCounter>();
     }
 
     private void Start()
     {
-        _scoreCounter = FindObjectOfType<ScoreCounter>();
-        
-        if (_playerTransform == null)
-            _playerTransform = FindObjectOfType<Player>().transform;
+
         _spawnedGround.Add(_firstGround);
     }
 
@@ -103,18 +100,11 @@ public class GroundPlacer : MonoBehaviour
         float preRotation = EulerToSimpleAngleX(PreRotationEuler);
         float nextRotation = EulerToSimpleAngleX(NextRotationEuler);
 
-        Debug.Log("OldPreRotation = " + preRotation);
-        Debug.Log("OldNextRotation = " + nextRotation);
-
         nextRotation = ComplicationAngle(preRotation, nextRotation);
-        
-        Debug.Log("ComplicationNextRotation = " + nextRotation);
 
         CorrectMinAcuteAngle(ref preRotation, ref nextRotation);
         CorrectMaxObtuseAngle(ref preRotation, ref nextRotation);
-        
-        Debug.Log("Corrected nextRotation = " + nextRotation);
-        
+
         ground.transform.rotation = Quaternion.Euler(nextRotation, 0, 0);
        
     }
