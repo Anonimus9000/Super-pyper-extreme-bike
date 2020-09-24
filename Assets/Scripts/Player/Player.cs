@@ -70,7 +70,9 @@ public class Player : Transport
 
     private void MovementLogic()
     {
-        if (Input.GetButton("Fire1") && IsOnGround() && _groundChecker.IsTrackedLayer())
+        bool _moveForward = (Input.GetButton("Fire2") || _mobileMove.IsMoveForward());
+        
+    if (_moveForward && IsOnGround() && _groundChecker.IsTrackedLayer())
         {
             MoveForward();
         }
@@ -83,7 +85,7 @@ public class Player : Transport
 
     private bool IsActive()
     {
-        if (_horizontalAxis != 0 || Input.GetButtonDown("Fire1"))
+        if (_horizontalAxis != 0 || Input.GetButtonDown("Fire2") || _mobileMove.IsMoveForward())
             return true;
         else
             return false;
