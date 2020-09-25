@@ -84,6 +84,9 @@ public class ScoreCounter : MonoBehaviour
         
         _score += _scoreForFlip * _checkFlip.GetLastFlipsCount();
         _checkFlip.ClearLastFlipCount();
+
+        if (_score < 0)
+            _score = 0;
     }
     private void ShowArguments()
     {
