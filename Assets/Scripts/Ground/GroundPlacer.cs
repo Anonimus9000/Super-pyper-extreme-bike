@@ -142,7 +142,7 @@ public class GroundPlacer : MonoBehaviour
     private float ComplicationAngle(float anglePreGround, float angleNextGround)
     {
         float complicationValue = _complicationByScore.Evaluate(_scoreCounter.GetScore());
-
+        
         if (Mathf.Abs(anglePreGround - angleNextGround) < 90)
             angleNextGround -= complicationValue;
           

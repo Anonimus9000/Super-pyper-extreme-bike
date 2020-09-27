@@ -8,7 +8,7 @@ public abstract class Transport : MonoBehaviour, ITransport
 {
     [SerializeField] protected float moveSpeed;
     [SerializeField] protected float turnSpeed;
-    
+
     protected Rigidbody rigidbody;
 
     /// <summary>
